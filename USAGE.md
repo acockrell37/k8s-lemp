@@ -7,6 +7,17 @@
     * A cache-clearing plugin such as [NGINX Cache](https://wordpress.org/plugins/nginx-cache/) if you want to make sure changes appear on your website promptly. There are also other plugins such as [NGINX Helper](https://wordpress.org/plugins/nginx-helper/) but this requires an additional NGINX module and we have not successfully tested this plugin.
 
 ## Installation
+
+### Prepare Kubectl cluster:
+  ```bash
+  $ gcloud container clusters get-credentials abovecrypto-web
+  Add result here
+  $ kubectl create clusterrolebinding cluster-admin-binding \
+  --clusterrole cluster-admin \
+  --user $(gcloud config get-value account)
+  Add result here
+  ```
+
 ### Create Namespaces:
   ```bash
   $ kubectl apply -f 00-namespace.yaml
@@ -47,9 +58,17 @@
   ```bash
   # Add cloud SQL user to database for proxy.
   $ gcloud sql users create proxyuser cloudsqlproxy~% --instance=<ENTER_INSTANCE_NAME> --password=<ENTER_PASSWORD>
-  # Add cloud SQL 
-  $ kubectl create secret generic cloudsql-instance-credentials \
-    --from-file=credentials.json=<ENTER_FILENAME.JSON>
+  # Install Cloud SQL proxy and secret keys 
+  $ helm install \
+    --namespace=wp-wd \
+    --name mysql-sqlproxy \
+    --set serviceAccountKey="$(cat <ENTER_FILENAME.json> | base64)" \
+    --set cloudsql.instances[0].instance=<ENTER INSTANCE> \
+    --set cloudsql.instances[0].project=<ENTER_PROJECT_NAME> \
+    --set cloudsql.instances[0].region=<ENTER_REGION> \
+    --set cloudsql.instances[0].port=3306 \
+    --set rbac.create=true \
+stable/gcloud-sqlproxy
   ```
 ### Create persistent disks (GCE) and your "core" services:
 * Edit the parameters in the StorageClass object in `core-gce-volumes.yaml` to reflect your correct zone and persistent disk type.
