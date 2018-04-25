@@ -37,13 +37,11 @@ spec:
         - name: WORDPRESS_DB_USER
           valueFrom:
             secretKeyRef:
-              name: cloudsql-db-credentials
-              key: username
+              value: proxyuser
         - name: WORDPRESS_DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cloudsql-db-credentials
-              key: password
+              value: j7S8Jj1jrxKkse3
         image: daxio/wordpress-redis:v1.6-fpm
         imagePullPolicy: IfNotPresent
         name: wp
