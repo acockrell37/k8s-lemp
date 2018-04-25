@@ -10,7 +10,9 @@
 
 ### Prepare Kubectl cluster:
   ```bash
-  $ gcloud container clusters get-credentials abovecrypto-web
+  $ gcloud container clusters create <ENTER_CLUSTER_NAME> --num-nodes=1
+  # If you didn't create the cluster with the above command get credentials.
+  $ gcloud container clusters get-credentials <ENTER_CLUSTER_NAME>
   Add result here
   $ kubectl create clusterrolebinding cluster-admin-binding \
   --clusterrole cluster-admin \
