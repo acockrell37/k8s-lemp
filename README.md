@@ -1,3 +1,5 @@
+#Modified to use Google Cloud SQL
+
 # Kubernetes LEMP Stack
 Kubernetes LEMP Stack is a distributed LEMP stack built on top of a Kubernetes cluster. It enables anyone to deploy multiple CMSs (currently WordPress) for any number of websites. We built it to be secure and very fast by default.
 
