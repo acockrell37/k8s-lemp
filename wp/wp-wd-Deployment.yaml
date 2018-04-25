@@ -33,7 +33,7 @@ spec:
       containers:
       - env:
         - name: WORDPRESS_DB_HOST
-          value: 127.0.0.1:3306
+          value: mysql-sqlproxy-gcloud-sqlproxy.wp-wd:3306
         - name: WORDPRESS_DB_USER
           valueFrom:
             secretKeyRef:
@@ -44,11 +44,6 @@ spec:
             secretKeyRef:
               name: cloudsql-db-credentials
               key: password
-        - image: gcr.io/cloudsql-docker/gce-proxy:1.11
-          name: cloudsql-proxy
-          command: ["/cloud_sql_proxy",
-                    "-instances=abovecrypto-web-197219:us-central1:web-db=tcp:3306",
-                    "-credential_file=/secrets/cloudsql/credentials.json"]
         image: daxio/wordpress-redis:v1.6-fpm
         imagePullPolicy: IfNotPresent
         name: wp
@@ -56,9 +51,6 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
-        - mountPath: /secrets/cloudsql
-          name: cloudsql-instance-credentials
-          readOnly: true
         - mountPath: /var/www/html
           name: wp-persistent-storage
         - mountPath: /usr/local/etc/php/conf.d
