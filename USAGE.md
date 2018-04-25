@@ -10,7 +10,9 @@
 
 ### Prepare Kubectl cluster:
   ```bash
+  # Create a cluster.
   $ gcloud container clusters create <ENTER_CLUSTER_NAME> --num-nodes=1
+  Creating cluster abovecrypto-web...done.  
   # If you didn't create the cluster with the above command get credentials.
   $ gcloud container clusters get-credentials <ENTER_CLUSTER_NAME>
   Add result here
@@ -33,6 +35,10 @@
   ```
 ### Create NGINX Ingress and `default-http-backend` (to catch invalid requests to Ingress and serve 404):
  ```bash
+  # This should initialize your user as a cluster admin under RBAC.
+  $ kubectl create clusterrolebinding cluster-admin-binding \
+  --clusterrole cluster-admin \
+  --user $(gcloud config get-value account)
   $ kubectl apply -f nginx/
   namespace "nginx-ingress" configured
   service "default-http-backend" created

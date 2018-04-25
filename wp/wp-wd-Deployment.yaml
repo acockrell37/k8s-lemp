@@ -35,9 +35,15 @@ spec:
         - name: WORDPRESS_DB_HOST
           value: mysql-sqlproxy-gcloud-sqlproxy.wp-wd:3306
         - name: WORDPRESS_DB_USER
-          value: proxyuser
+          valueFrom:
+            secretKeyRef:
+              name: cloudsql-db-credentials
+              key: username
         - name: WORDPRESS_DB_PASSWORD
-          value: j7S8Jj1jrxKkse3
+          valueFrom:
+            secretKeyRef:
+              name: cloudsql-db-credentials
+              key: username
         - name: WORDPRESS_DB_DATABASE
           value: wordpress
         image: daxio/wordpress-redis:v1.6-fpm
