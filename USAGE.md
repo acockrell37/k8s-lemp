@@ -39,6 +39,7 @@
   $ kubectl create clusterrolebinding cluster-admin-binding \
   --clusterrole cluster-admin \
   --user $(gcloud config get-value account)
+  clusterrolebinding "cluster-admin-binding" created
   $ kubectl apply -f nginx/
   namespace "nginx-ingress" configured
   service "default-http-backend" created
@@ -55,7 +56,7 @@
   
 * GCE should give you a `LoadBalancer` for your NGINX Service. Watch for your public IP address:
   ```bash
-  $ watch kubectl describe svc nginx --namespace nginx-ingress
+  $ kubectl describe svc nginx --namespace nginx-ingress
   ...
   LoadBalancer Ingress:   1.2.3.4
   ...
@@ -66,6 +67,11 @@
   ```bash
   # Add cloud SQL user to database for proxy.
   $ gcloud sql users create proxyuser cloudsqlproxy~% --instance=<ENTER_INSTANCE_NAME> --password=<ENTER_PASSWORD>
+  # Prepare kubectl for tiller
+  $ kubectl create serviceaccount --namespace kube-system tiller
+  $ kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --  serviceaccount=kube-system:tiller
+  $ kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'      
+  $ helm init --service-account tiller --upgrade
   # Install Cloud SQL proxy and secret keys 
   $ helm install \
     --namespace=wp-wd \

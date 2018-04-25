@@ -37,13 +37,13 @@ spec:
         - name: WORDPRESS_DB_USER
           valueFrom:
             secretKeyRef:
-              name: cloudsql-db-credentials
+              name: mysql-sqlproxy-gcloud-sqlproxy
               key: username
         - name: WORDPRESS_DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cloudsql-db-credentials
-              key: username
+              name: mysql-sqlproxy-gcloud-sqlproxy
+              key: password
         - name: WORDPRESS_DB_DATABASE
           value: wordpress
         image: daxio/wordpress-redis:v1.6-fpm
