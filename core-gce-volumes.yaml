@@ -6,7 +6,7 @@ metadata:
 provisioner: kubernetes.io/gce-pd
 parameters:
   type: pd-standard
-  zone: europe-west1-d
+  zone: us-central1-f
 ---
 apiVersion: v1
 kind: PersistentVolume
