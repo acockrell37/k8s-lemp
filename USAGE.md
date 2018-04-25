@@ -43,22 +43,20 @@
   ```
 * Go to your domain's DNS settings and point your domain to this IP address. After DNS propogates you should see the message "default backend - 404" straight away when visiting your newly set-up domain in a browser. This is the `default-http-backend` doing it's job.
 
-### Create `Secret` objects `mariadb-pass-root`:
+### Create `Secret` objects `cloudsql-instance-credentials`:
   ```bash
-  $ openssl rand -base64 20 > /tmp/mariadb-pass-root.txt
-  # Delete newlines from the password file or else the password won't work in MariaDB
-  $ tr --delete '\n' </tmp/mariadb-pass-root.txt >/tmp/.strippedpassword.txt
-  $ mv /tmp/.strippedpassword.txt /tmp/mariadb-pass-root.txt
-  $ kubectl create secret generic mariadb-pass-root --from-file=/tmp/mariadb-pass-root.txt --namespace=core
+  # Add cloud SQL user to database for proxy.
+  $ gcloud sql users create proxyuser cloudsqlproxy~% --instance=<ENTER_INSTANCE_NAME> --password=<ENTER_PASSWORD>
+  # Add cloud SQL 
+  $ kubectl create secret generic cloudsql-instance-credentials \
+    --from-file=credentials.json=<ENTER_FILENAME.JSON>
   ```
 ### Create persistent disks (GCE) and your "core" services:
 * Edit the parameters in the StorageClass object in `core-gce-volumes.yaml` to reflect your correct zone and persistent disk type.
 * Make sure the disks are in the same `<zone>`as your cluster and that the names match the `pdName` from `core-gce-volumes.yaml`:
   
   ```bash
-  $ gcloud compute disks create --size=10GB --zone=<zone> mariadb
   $ kubectl apply -f core-gce-volumes.yaml
-  $ kubectl apply -f mariadb-StatefulSet.yaml
   $ kubectl apply -f redis-Deployment.yaml
   ```
 
@@ -72,26 +70,6 @@
   $ kubectl --namespace=wp-wd create configmap nginx-conf-d --from-file=wp/nginx/conf.d
   $ kubectl --namespace=wp-wd create configmap nginx-global --from-file=wp/nginx/global
   $ kubectl --namespace=wp-wd create configmap nginx-html --from-file=wp/nginx/html
-  ```
-
-* Create a new `Secret` for your new DB user
- 
-  ```bash
-  $ openssl rand -base64 20 > /tmp/mariadb-pass-wp-wd.txt
-  $ tr --delete '\n' </tmp/mariadb-pass-wp-wd.txt >/tmp/.strippedpassword.txt
-  $ mv /tmp/.strippedpassword.txt /tmp/mariadb-pass-wp-wd.txt
-  $ kubectl create secret generic mariadb-pass-wp-wd --from-file=/tmp/mariadb-pass-wp-wd.txt --namespace=wp-wd
-  ```
-
-* Manually add a new database in the `mariadb` `StatefulSet` and grant privileges to the WP user.
-
-  ```bash
-  $ kubectl --namespace=core exec -it mariadb-0 -- /bin/bash
-  root@mariadb-0:/# mysql -u root -p"$MYSQL_ROOT_PASSWORD"
-  > CREATE DATABASE dbWPWD DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-  > GRANT ALL PRIVILEGES ON dbWPWD.* TO 'wp-wd'@'%' IDENTIFIED BY 'THE_ACTUAL_PW_FROM_LAST_STEP';
-  > FLUSH PRIVILEGES;
-  > EXIT;
   ```
 
 * Create the PD for the WordPress/NGINX Deployment.
@@ -154,36 +132,10 @@
     $ kubectl --namespace=wp-dd create configmap nginx-global --from-file=wp-dd/nginx/global
     $ kubectl --namespace=wp-dd create configmap nginx-html --from-file=wp-dd/nginx/html
     ```
-  
-  * Create a new `Secret` for your new DB user and save it for the next step
-    ```bash
-    $ openssl rand -base64 20 > /tmp/mariadb-pass-wp-dd.txt
-    $ tr --delete '\n' </tmp/mariadb-pass-wp-dd.txt >/tmp/.strippedpassword.txt
-    $ mv /tmp/.strippedpassword.txt /tmp/mariadb-pass-wp-dd.txt
-    $ kubectl create secret generic mariadb-pass-wp-dd --from-file=/tmp/mariadb-pass-wp-dd.txt --namespace=wp-dd
-    $ cat /tmp/mariadb-pass-wp-dd.txt
-    ```
-  
+    
   * Again in `wp-dd/wp-dd-Deployment.yaml`, update all `.spec.template.spec.containers[0].env[].value` fields to match your new database name, user, and `secretKeyRef`.
 
   * Finally update both `.host*:` values in both `wp-dd/*tls-Ingress.yaml` files:
-
-* Manually add a new database in the `mariadb` `StatefulSet` and grant privileges to a new user.
-  ```bash
-  $ kubectl --namespace=core exec -it mariadb-0 -- /bin/bash
-  root@mariadb-0:/# mysql -u root -p"$MYSQL_ROOT_PASSWORD"
-  > CREATE DATABASE dbWPDD DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-  > GRANT ALL PRIVILEGES ON dbWPDD.* TO 'wp-dd'@'%' IDENTIFIED BY 'THE_ACTUAL_PW_FROM_LAST_STEP';
-  > FLUSH PRIVILEGES;
-  > EXIT;
-  ```
-
-* Or restore a database from a previous or backed up website:
-  ```bash
-  $ kubectl cp /path/to/DBbackup/dbWPDD.bak.sql core/mariadb-0:/root/dbWPDD.bak.sql
-  $ kubectl --namespace=core exec -it mariadb-0 -- /bin/bash
-  root@mariadb-0:/# mysql -u root -p"$MYSQL_ROOT_PASSWORD" dbWPDD < dbWPDD.bak.sql
-  ```
 
 * Create another PD.
   ```bash

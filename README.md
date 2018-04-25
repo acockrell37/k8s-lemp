@@ -1,5 +1,3 @@
-#Modified to use Google Cloud SQL
-
 # Kubernetes LEMP Stack
 Kubernetes LEMP Stack is a distributed LEMP stack built on top of a Kubernetes cluster. It enables anyone to deploy multiple CMSs (currently WordPress) for any number of websites. We built it to be secure and very fast by default.
 
@@ -20,11 +18,6 @@ Actually, **k8s LEMP Stack** should be able to serve as your own personal web se
   * We build NGINX with the [`nginx-naxsi`](https://github.com/chepurko/nginx-naxsi) image, which comes with:
     * NBS System's [NAXSI module](https://github.com/nbs-system/naxsi). NAXSI means [NGINX](http://nginx.org/) Anti-[XSS](https://www.owasp.org/index.php/Cross-site_Scripting_%28XSS%29) & [SQL Injection](https://www.owasp.org/index.php/SQL_injection).
     * Handy configurations for NGINX and the NAXSI web application firewall are also included via `ConfigMap`s.
-  
-* **MariaDB**
-  * Initially, the WordPress pods all interface with one `mariadb` `StatefulSet`. This is so anyone can start off with a full-fledged web farm and bring up any number of websites using one `mariadb` instance with a databse for each site. Future improvements will allow for HA and scalable clustered RDBMSs.
-  * `mariadb` also gets a `PersistentVolume` and `Secret` objects.
-  * Updating `StatefulSet` objects in Kubernetes is [currently a manual process](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#limitations), meaning we have to execute MySQL commands in the `mariadb` pod to add new databases and users.
   
 * **Redis**
   * To reduce hits to the DB we build the WP image with the `redis` PHP extension and include a Redis `Deployment`.
