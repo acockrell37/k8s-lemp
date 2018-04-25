@@ -49,7 +49,7 @@ spec:
           command: ["/cloud_sql_proxy",
                     "-instances=abovecrypto-web-197219:us-central1:web-db=tcp:3306",
                     "-credential_file=/secrets/cloudsql/credentials.json"]
-        image: daxio/wordpress-redis:v1.6-fpm
+        image: trevornk/wordpress-redis:v1.6-fpm
         imagePullPolicy: IfNotPresent
         name: wp
         resources: {}
