@@ -9,10 +9,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - www.wingdings.com
+    - www.abovecrypto.com
     secretName: wp-wd-tls
   rules:
-  - host: www.wingdings.com
+  - host: www.abovecrypto.com
     http:
       paths:
       - path: /
