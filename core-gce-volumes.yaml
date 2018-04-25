@@ -7,19 +7,3 @@ provisioner: kubernetes.io/gce-pd
 parameters:
   type: pd-standard
   zone: us-central1-f
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: mariadb-pv
-  labels:
-    app: mariadb
-spec:
-  capacity:
-    storage: 10Gi
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: slow
-  gcePersistentDisk:
-    pdName: mariadb
-    fsType: ext4
